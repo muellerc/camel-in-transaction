@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="
-       		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        ">
 
     <import resource="broker.xml"/>
@@ -28,14 +28,14 @@
     <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory" depends-on="broker">
         <property name="brokerURL" value="tcp://localhost:61616"/>
         <property name="redeliveryPolicy">
-        	<bean class="org.apache.activemq.RedeliveryPolicy">
-        		<property name="maximumRedeliveries" value="0"/>
-        	</bean>
+            <bean class="org.apache.activemq.RedeliveryPolicy">
+                <property name="maximumRedeliveries" value="0"/>
+            </bean>
         </property>
     </bean>
 
     <bean id="activemqTx" class="org.apache.activemq.camel.component.ActiveMQComponent">
-    	<property name="connectionFactory" ref="pooledJmsConnectionFactory"/>
+        <property name="connectionFactory" ref="pooledJmsConnectionFactory"/>
         <property name="transacted" value="true"/>
         <property name="transactionManager" ref="transactionManager"/>
     </bean>
@@ -43,7 +43,7 @@
     <!-- JMS configuration for test enqueue/dequeue without transactions -->
     
     <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
-    	<property name="connectionFactory" ref="pooledJmsConnectionFactory"/>
+        <property name="connectionFactory" ref="pooledJmsConnectionFactory"/>
         <property name="transacted" value="false"/>
     </bean>
 </beans>

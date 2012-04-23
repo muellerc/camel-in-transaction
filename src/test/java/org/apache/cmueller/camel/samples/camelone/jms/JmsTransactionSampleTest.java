@@ -34,6 +34,7 @@ public class JmsTransactionSampleTest extends CamelSpringTestSupport {
             public void configure() throws Exception {
                 from("activemqTx:queue:transaction.incoming.one")
                     .transacted("PROPAGATION_REQUIRED")
+                    .to("bean:businessService?method=computeOffer")
                     .to("activemqTx:queue:transaction.outgoing.one");
                 
                 from("activemqTx:queue:transaction.incoming.two")

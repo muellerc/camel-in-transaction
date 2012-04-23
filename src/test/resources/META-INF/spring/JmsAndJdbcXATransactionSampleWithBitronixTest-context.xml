@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="
-       		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        ">
 
     <import resource="broker.xml"/>
@@ -14,11 +14,11 @@
         <property name="userTransaction" ref="transactionManager" />
     </bean>
 
-	<bean id="btmConfig" factory-method="getConfiguration" class="bitronix.tm.TransactionManagerServices">
-	    <property name="serverId" value="spring-btm" />
-	</bean>
+    <bean id="btmConfig" factory-method="getConfiguration" class="bitronix.tm.TransactionManagerServices">
+        <property name="serverId" value="spring-btm" />
+    </bean>
 	
-	<bean id="transactionManager" factory-method="getTransactionManager" class="bitronix.tm.TransactionManagerServices" depends-on="btmConfig" destroy-method="shutdown" />
+    <bean id="transactionManager" factory-method="getTransactionManager" class="bitronix.tm.TransactionManagerServices" depends-on="btmConfig" destroy-method="shutdown" />
 
     <bean id="PROPAGATION_REQUIRED" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
         <property name="transactionManager" ref="jtaTransactionManager"/>
@@ -27,26 +27,26 @@
     
     <!-- JMS configuration -->
     
-	<bean id="resourceManager" class="org.apache.activemq.pool.ActiveMQResourceManager" init-method="recoverResource">
-		<property name="transactionManager" ref="transactionManager" />
-		<property name="connectionFactory" ref="pooledJmsXaConnectionFactory" />
-		<property name="resourceName" value="activemq.default" />
-	</bean>
+    <bean id="resourceManager" class="org.apache.activemq.pool.ActiveMQResourceManager" init-method="recoverResource">
+        <property name="transactionManager" ref="transactionManager" />
+        <property name="connectionFactory" ref="pooledJmsXaConnectionFactory" />
+        <property name="resourceName" value="activemq.default" />
+    </bean>
     
-	<bean id="pooledJmsXaConnectionFactory" class="bitronix.tm.resource.jms.PoolingConnectionFactory" init-method="init" destroy-method="close" depends-on="broker">
-		<property name="className" value="org.apache.activemq.ActiveMQXAConnectionFactory" />
-		<property name="uniqueName" value="activemq" />
-		<property name="maxPoolSize" value="8" />
-		<property name="driverProperties">
-			<props>
-				<prop key="brokerURL">tcp://localhost:61616</prop>
-			</props>
-		</property>
-	</bean>
+    <bean id="pooledJmsXaConnectionFactory" class="bitronix.tm.resource.jms.PoolingConnectionFactory" init-method="init" destroy-method="close" depends-on="broker">
+        <property name="className" value="org.apache.activemq.ActiveMQXAConnectionFactory" />
+        <property name="uniqueName" value="activemq" />
+        <property name="maxPoolSize" value="8" />
+        <property name="driverProperties">
+            <props>
+                <prop key="brokerURL">tcp://localhost:61616</prop>
+            </props>
+        </property>
+    </bean>
 
     <bean id="activemqXa" class="org.apache.activemq.camel.component.ActiveMQComponent">
-    	<!-- because of https://issues.apache.org/jira/browse/AMQ-3251, we cannot use the XaPooledConnectionFactory in AMQ 5.5.1 -->
-    	<property name="connectionFactory" ref="pooledJmsXaConnectionFactory"/>
+        <!-- because of https://issues.apache.org/jira/browse/AMQ-3251, we cannot use the XaPooledConnectionFactory in AMQ 5.5.1 -->
+        <property name="connectionFactory" ref="pooledJmsXaConnectionFactory"/>
         <property name="transacted" value="false"/>
         <property name="transactionManager" ref="jtaTransactionManager"/>
     </bean>
@@ -58,22 +58,22 @@
     </bean>
     
     <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
-    	<property name="connectionFactory" ref="jmsConnectionFactory"/>
+        <property name="connectionFactory" ref="jmsConnectionFactory"/>
         <property name="transacted" value="false"/>
     </bean>
     
     <!-- JDBC configuration -->
 
     <bean id="dataSource" class="bitronix.tm.resource.jdbc.PoolingDataSource" init-method="init" destroy-method="close">
-    	<property name="uniqueName" value="testdb" />
+        <property name="uniqueName" value="testdb" />
         <property name="className" value="org.apache.derby.jdbc.EmbeddedXADataSource40"/>
         <property name="maxPoolSize" value="5"/>
 	    <property name="driverProperties">
-	        <props>
-	            <prop key="databaseName">testdb</prop>
-	            <prop key="databaseName">target/testdb</prop>
-	            <prop key="connectionAttributes">create=true</prop>
-	        </props>
-	    </property>
+            <props>
+                <prop key="databaseName">testdb</prop>
+                <prop key="databaseName">target/testdb</prop>
+                <prop key="connectionAttributes">create=true</prop>
+            </props>
+        </property>
     </bean>
 </beans>

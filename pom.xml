@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 	
-	<groupId>org.apache.cmueller.camel.samples.camelone</groupId>
-	<artifactId>camel-in-transaction</artifactId>
-	<version>1.0.0</version>
+    <groupId>org.apache.cmueller.camel.samples.camelone</groupId>
+    <artifactId>camel-in-transaction</artifactId>
+    <version>1.0.0</version>
 	
-	<dependencies>
+    <dependencies>
 		<!-- database related dependencies -->
         <dependency>
             <groupId>org.apache.camel</groupId>
@@ -42,7 +42,7 @@
             <version>5.6-SNAPSHOT</version>
         </dependency>
         
-		<!-- Atomikos transaction manager -->
+        <!-- Atomikos transaction manager -->
         <dependency>
             <groupId>com.atomikos</groupId>
             <artifactId>transactions</artifactId>
@@ -72,14 +72,14 @@
             <artifactId>jotm</artifactId>
             <version>2.0.10</version>
             <exclusions>
-            	<exclusion>
-            		<groupId>javax.transaction</groupId>
-            		<artifactId>jta</artifactId>
-            	</exclusion>
-            	<exclusion>
-            		<groupId>javax.resource</groupId>
-            		<artifactId>connector</artifactId>
-            	</exclusion>
+                <exclusion>
+                    <groupId>javax.transaction</groupId>
+                    <artifactId>jta</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.resource</groupId>
+                    <artifactId>connector</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
