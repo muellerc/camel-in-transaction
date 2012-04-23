@@ -1,10 +1,12 @@
 package org.apache.cmueller.camel.samples.camelone.xa;
 
 import java.sql.SQLException;
+import java.util.concurrent.CountDownLatch;
 
 import javax.sql.DataSource;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.test.junit4.CamelSpringTestSupport;
 import org.junit.After;
@@ -21,6 +23,8 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
 
     private JdbcTemplate jdbc;
     private TransactionTemplate transactionTemplate;
+    
+    private CountDownLatch latch = new CountDownLatch(1000);
     
     @Before
     @Override
@@ -106,6 +110,24 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
     }
+    
+    @Test
+    public void perfTest() throws Exception {
+        assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
+        assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
+        
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            template.sendBody("activemq:queue:transaction.incoming.four", new Long(1));
+        }
+        latch.await();
+        long end = System.currentTimeMillis();
+
+        System.out.println("duration: " + (end -start) + "ms");
+        
+        assertEquals(0, queryForLong("SELECT balance from account where name = 'foo'"));
+        assertEquals(2000, queryForLong("SELECT balance from account where name = 'bar'"));
+    }
 
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
@@ -131,6 +153,18 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
                     .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSourceRef=dataSource")
                     .throwException(new SQLException("forced exception for test"))
                     .to("activemqXa:queue:transaction.outgoing.three");
+                
+                from("activemqXa:queue:transaction.incoming.four")
+	                .transacted("PROPAGATION_REQUIRED")
+	                .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSourceRef=dataSource")
+	                .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSourceRef=dataSource")
+	                .to("activemqXa:queue:transaction.outgoing.four")
+	                .process(new Processor() {
+						@Override
+						public void process(Exchange exchange) throws Exception {
+							latch.countDown();
+						}
+					});
             }
         };
     }    
