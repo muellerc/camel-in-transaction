@@ -1,4 +1,4 @@
-package org.apache.cmueller.camel.samples.camelone.jdbc;
+package org.apache.cmueller.camel.samples.camelone.xa;
 
 import java.sql.SQLException;
 
@@ -10,8 +10,6 @@ import org.apache.camel.test.junit4.CamelSpringTestSupport;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -19,7 +17,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-public class JdbcTransactionSample extends CamelSpringTestSupport {
+public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringTestSupport {
 	
 	private JdbcTemplate jdbc;
 	private TransactionTemplate transactionTemplate;
@@ -32,7 +30,7 @@ public class JdbcTransactionSample extends CamelSpringTestSupport {
         DataSource ds = context.getRegistry().lookup("dataSource", DataSource.class);
         jdbc = new JdbcTemplate(ds);
         
-        PlatformTransactionManager transactionManager = context.getRegistry().lookup("transactionManager", PlatformTransactionManager.class);
+        PlatformTransactionManager transactionManager = context.getRegistry().lookup("jtaTransactionManager", PlatformTransactionManager.class);
         transactionTemplate = new TransactionTemplate(transactionManager);
         
     	transactionTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -68,13 +66,13 @@ public class JdbcTransactionSample extends CamelSpringTestSupport {
     }
 	
 	@Test
-	public void moneyShouldBeTransfered() throws Exception {
+	public void moneyShouldBeTransfered() {
 		assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
 		assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
 		
-		template.sendBody("seda:transaction.incoming.one", new Long(100));
+		template.sendBody("activemq:queue:transaction.incoming.one", new Long(100));
 		
-		Exchange exchange = consumer.receive("seda:transaction.outgoing.one", 5000);
+		Exchange exchange = consumer.receive("activemq:queue:transaction.outgoing.one", 5000);
 		assertNotNull(exchange);
 		
 		assertEquals(900, queryForLong("SELECT balance from account where name = 'foo'"));
@@ -82,12 +80,14 @@ public class JdbcTransactionSample extends CamelSpringTestSupport {
 	}
 	
 	@Test
-	public void moneyShouldNotTransfered() throws Exception {
+	public void moneyShouldNotTransfered() {
 		assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
 		assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
 		
-		template.sendBody("seda:transaction.incoming.two", new Long(100));
-		Thread.sleep(2000);
+		template.sendBody("activemq:queue:transaction.incoming.two", new Long(100));
+		
+		Exchange exchange = consumer.receive("activemq:queue:ActiveMQ.DLQ", 5000);
+		assertNotNull(exchange);
 		
 		assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
 		assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
@@ -98,8 +98,10 @@ public class JdbcTransactionSample extends CamelSpringTestSupport {
 		assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
 		assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
 		
-		template.sendBody("seda:transaction.incoming.three", new Long(100));
-		Thread.sleep(2000);
+		template.sendBody("activemq:queue:transaction.incoming.three", new Long(100));
+		
+		Exchange exchange = consumer.receive("activemq:queue:ActiveMQ.DLQ", 5000);
+		assertNotNull(exchange);
 		
 		assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
 		assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
@@ -110,31 +112,26 @@ public class JdbcTransactionSample extends CamelSpringTestSupport {
         return new RouteBuilder() {
             @Override
             public void configure() throws Exception {
-                from("seda:transaction.incoming.one")
+                from("activemqXa:queue:transaction.incoming.one")
                     .transacted("PROPAGATION_REQUIRED")
                     .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSourceRef=dataSource")
                     .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSourceRef=dataSource")
-                    .to("seda:transaction.outgoing.one");
+                    .to("activemqXa:queue:transaction.outgoing.one");
                 
-                from("seda:transaction.incoming.two")
+                from("activemqXa:queue:transaction.incoming.two")
 	                .transacted("PROPAGATION_REQUIRED")
 	                .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSourceRef=dataSource")
 	                .throwException(new SQLException("forced exception for test"))
 	                .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSourceRef=dataSource")
-	                .to("seda:transaction.outgoing.two");
+	                .to("activemqXa:queue:transaction.outgoing.two");
                 
-                from("seda:transaction.incoming.three")
+                from("activemqXa:queue:transaction.incoming.three")
 	                .transacted("PROPAGATION_REQUIRED")
-	                .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSourceRef=dataSource")
-	                .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSourceRef=dataSource")
+                    .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSourceRef=dataSource")
+                    .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSourceRef=dataSource")
 	                .throwException(new SQLException("forced exception for test"))
-	                .to("seda:transaction.outgoing.three");
+	                .to("activemqXa:queue:transaction.outgoing.three");
             }
         };
-    }
-    
-	@Override
-	protected AbstractApplicationContext createApplicationContext() {
-		return new ClassPathXmlApplicationContext("META-INF/spring/JdbcTransactionSample-context.xml");
-	}
+    }	
 }

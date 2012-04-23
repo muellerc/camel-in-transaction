@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class JmsTransactionSample extends CamelSpringTestSupport {
+public class JmsTransactionSampleTest extends CamelSpringTestSupport {
 	
 	@Test
 	public void moneyShouldBeTransfered() {
@@ -46,6 +46,6 @@ public class JmsTransactionSample extends CamelSpringTestSupport {
     
 	@Override
 	protected AbstractApplicationContext createApplicationContext() {
-		return new ClassPathXmlApplicationContext("META-INF/spring/JmsTransactionSample-context.xml");
+		return new ClassPathXmlApplicationContext("META-INF/spring/JmsTransactionSampleTest-context.xml");
 	}
 }
