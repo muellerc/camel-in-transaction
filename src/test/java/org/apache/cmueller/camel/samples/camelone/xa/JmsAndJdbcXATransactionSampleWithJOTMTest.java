@@ -5,8 +5,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class JmsAndJdbcXATransactionSampleWithJOTMTest extends BaseJmsAndJdbcXATransactionSampleTest {
 
-	@Override
-	protected AbstractApplicationContext createApplicationContext() {
-		return new ClassPathXmlApplicationContext("META-INF/spring/JmsAndJdbcXATransactionSampleWithJOTMTest-context.xml");
-	}	
+    @Override
+    protected AbstractApplicationContext createApplicationContext() {
+        return new ClassPathXmlApplicationContext("META-INF/spring/JmsAndJdbcXATransactionSampleWithJOTMTest-context.xml");
+    }    
 }

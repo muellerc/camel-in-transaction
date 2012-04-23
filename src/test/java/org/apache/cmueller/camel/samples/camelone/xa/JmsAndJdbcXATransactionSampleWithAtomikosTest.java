@@ -5,8 +5,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class JmsAndJdbcXATransactionSampleWithAtomikosTest extends BaseJmsAndJdbcXATransactionSampleTest {
 
-	@Override
-	protected AbstractApplicationContext createApplicationContext() {
-		return new ClassPathXmlApplicationContext("META-INF/spring/JmsAndJdbcXATransactionSampleWithAtomikosTest-context.xml");
-	}	
+    @Override
+    protected AbstractApplicationContext createApplicationContext() {
+        return new ClassPathXmlApplicationContext("META-INF/spring/JmsAndJdbcXATransactionSampleWithAtomikosTest-context.xml");
+    }    
 }

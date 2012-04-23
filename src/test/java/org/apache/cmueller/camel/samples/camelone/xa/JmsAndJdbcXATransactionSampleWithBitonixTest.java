@@ -5,8 +5,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class JmsAndJdbcXATransactionSampleWithBitonixTest extends BaseJmsAndJdbcXATransactionSampleTest {
 
-	@Override
-	protected AbstractApplicationContext createApplicationContext() {
-		return new ClassPathXmlApplicationContext("META-INF/spring/JmsAndJdbcXATransactionSampleWithBitronixTest-context.xml");
-	}	
+    @Override
+    protected AbstractApplicationContext createApplicationContext() {
+        return new ClassPathXmlApplicationContext("META-INF/spring/JmsAndJdbcXATransactionSampleWithBitronixTest-context.xml");
+    }    
 }
