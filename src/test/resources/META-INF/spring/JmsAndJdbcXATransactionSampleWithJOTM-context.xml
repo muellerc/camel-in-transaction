@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+	       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       ">
+
+    <import resource="broker.xml"/>
+    
+    <!-- TX configuration -->
+    
+    <bean id="jotm" class="org.objectweb.jotm.Jotm">
+    	<constructor-arg index="0" value="true"/>
+    	<constructor-arg index="1" value="false"/>
+    </bean>
+    
+    <bean id="jtaTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="userTransaction" ref="userTransaction"/>
+    </bean>
+    
+    <bean id="transactionManager" factory-method="getTransactionManager" factory-bean="jotm" />
+    
+    <bean id="userTransaction" factory-method="getUserTransaction" factory-bean="jotm" />
+
+    <bean id="PROPAGATION_REQUIRED" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
+        <property name="transactionManager" ref="jtaTransactionManager"/>
+        <property name="propagationBehaviorName" value="PROPAGATION_REQUIRED"/>
+    </bean>
+    
+    <!-- JMS configuration -->
+    
+	<bean id="resourceManager" class="org.apache.activemq.pool.ActiveMQResourceManager" init-method="recoverResource">
+		<property name="transactionManager" ref="transactionManager" />
+		<property name="connectionFactory" ref="pooledJmsXaConnectionFactory" />
+		<property name="resourceName" value="activemq.default" />
+	</bean>
+
+    <bean id="pooledJmsXaConnectionFactory" class="org.apache.activemq.pool.XaPooledConnectionFactory">
+        <property name="maxConnections" value="8" />
+        <property name="connectionFactory" ref="jmsXaConnectionFactory" />
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+    
+    <bean id="jmsXaConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory" depends-on="broker">
+        <property name="brokerURL" value="tcp://localhost:61616"/>
+        <property name="redeliveryPolicy">
+        	<bean class="org.apache.activemq.RedeliveryPolicy">
+        		<property name="maximumRedeliveries" value="0"/>
+        	</bean>
+        </property>
+    </bean>
+
+    <bean id="activemqXa" class="org.apache.activemq.camel.component.ActiveMQComponent">
+    	<!-- because of https://issues.apache.org/jira/browse/AMQ-3251, we cannot use the XaPooledConnectionFactory in AMQ 5.5.1 -->
+    	<property name="connectionFactory" ref="pooledJmsXaConnectionFactory"/>
+        <property name="transacted" value="false"/>
+        <property name="transactionManager" ref="jtaTransactionManager"/>
+    </bean>
+    
+    <!-- JMS configuration for test enqueue/dequeue without transactions -->
+
+    <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory" depends-on="broker">
+        <property name="brokerURL" value="tcp://localhost:61616"/>
+    </bean>
+    
+    <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
+    	<property name="connectionFactory" ref="jmsConnectionFactory"/>
+        <property name="transacted" value="false"/>
+    </bean>
+    
+    <!-- JDBC configuration -->
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.managed.BasicManagedDataSource">
+    	<property name="transactionManager" ref="transactionManager"/>
+        <property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource40"/>
+        <property name="url" value="jdbc:derby:target/testdb;create=true"/>
+        <property name="defaultAutoCommit" value="false"/>
+    </bean>
+</beans>
