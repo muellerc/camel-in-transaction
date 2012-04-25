@@ -46,4 +46,8 @@
         <property name="connectionFactory" ref="pooledJmsConnectionFactory"/>
         <property name="transacted" value="false"/>
     </bean>
+    
+    <!-- business service implementation -->
+    
+    <bean id="businessService" class="org.apache.cmueller.camel.samples.camelone.jms.BusinessService"/>
 </beans>
