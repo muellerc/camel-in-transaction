@@ -6,14 +6,14 @@
        ">
 
     <import resource="broker.xml"/>
-    
+
     <!-- TX configuration -->
-    
+
     <bean id="jtaTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
         <property name="transactionManager" ref="transactionManager"/>
         <property name="userTransaction" ref="userTransaction"/>
     </bean>
-    
+
     <bean id="transactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close">
         <property name="forceShutdown" value="false"/>
     </bean>
@@ -21,12 +21,12 @@
     <bean id="userTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
         <property name="transactionTimeout" value="120"/>
     </bean>
-    
+
     <bean id="PROPAGATION_REQUIRED" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
         <property name="transactionManager" ref="jtaTransactionManager"/>
         <property name="propagationBehaviorName" value="PROPAGATION_REQUIRED"/>
     </bean>
-    
+
     <!-- JMS configuration -->
 
     <bean id="resourceManager" class="org.apache.activemq.pool.ActiveMQResourceManager" init-method="recoverResource">
@@ -34,13 +34,13 @@
         <property name="connectionFactory" ref="pooledJmsXaConnectionFactory" />
         <property name="resourceName" value="activemq.default" />
     </bean>
-    
+
     <bean id="pooledJmsXaConnectionFactory" class="org.apache.activemq.pool.XaPooledConnectionFactory">
         <property name="maxConnections" value="8" />
         <property name="connectionFactory" ref="jmsXaConnectionFactory" />
         <property name="transactionManager" ref="transactionManager"/>
     </bean>
-    
+
     <bean id="jmsXaConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory" depends-on="broker">
         <property name="brokerURL" value="tcp://localhost:61616"/>
         <property name="redeliveryPolicy">
@@ -49,30 +49,48 @@
             </bean>
         </property>
     </bean>
-    
+
     <bean id="activemqXa" class="org.apache.activemq.camel.component.ActiveMQComponent">
         <property name="connectionFactory" ref="pooledJmsXaConnectionFactory"/>
         <property name="transacted" value="false"/>
         <property name="transactionManager" ref="jtaTransactionManager"/>
     </bean>
-    
+
     <!-- JMS configuration for test enqueue/dequeue without transactions -->
 
     <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory" depends-on="broker">
         <property name="brokerURL" value="tcp://localhost:61616"/>
     </bean>
-    
+
     <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
         <property name="connectionFactory" ref="jmsConnectionFactory"/>
         <property name="transacted" value="false"/>
     </bean>
-    
-    <!-- JDBC configuration -->
 
+    <!-- JDBC configuration -->
+<!---->
     <bean id="dataSource" class="org.apache.commons.dbcp.managed.BasicManagedDataSource">
         <property name="transactionManager" ref="transactionManager"/>
         <property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource40"/>
         <property name="url" value="jdbc:derby:target/testdb;create=true"/>
         <property name="defaultAutoCommit" value="false"/>
     </bean>
+
+  <!--
+  <bean id="dataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean"
+		init-method="init" destroy-method="close">
+		<property name="uniqueResourceName" value="testdb" />
+		<property name="xaDataSourceClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource" />
+		<property name="xaProperties">
+			<props>
+				<prop key="databaseName">target/testdb</prop>
+				<prop key="createDatabase">create</prop>
+			</props>
+		</property>
+		<property name="poolSize" value="5"/>
+		<property name="minPoolSize" value="1" />
+		<property name="maxPoolSize" value="10" />
+		<property name="borrowConnectionTimeout" value="10000" />
+	</bean>
+	 -->
 </beans>
