@@ -24,7 +24,7 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
     private JdbcTemplate jdbc;
     private TransactionTemplate transactionTemplate;
     
-    private CountDownLatch latch = new CountDownLatch(1000);
+    private CountDownLatch latch;
     
     @Before
     @Override
@@ -116,6 +116,14 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
         
+        // warm up
+        latch = new CountDownLatch(100);
+        for (int i = 0; i < 100; i++) {
+            template.sendBody("activemq:queue:transaction.incoming.four", new Long(0));
+        }
+        latch.await();
+        
+        latch = new CountDownLatch(1000);
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             template.sendBody("activemq:queue:transaction.incoming.four", new Long(1));
