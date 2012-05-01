@@ -41,6 +41,7 @@
         <property name="transactionManager" ref="transactionManager"/>
     </bean>
 
+
     <bean id="jmsXaConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory" depends-on="broker">
         <property name="brokerURL" value="tcp://localhost:61616"/>
         <property name="redeliveryPolicy">
@@ -87,10 +88,10 @@
 				<prop key="createDatabase">create</prop>
 			</props>
 		</property>
-		<property name="poolSize" value="5"/>
+		<property name="poolSize" value="8"/>
 		<property name="minPoolSize" value="1" />
-		<property name="maxPoolSize" value="10" />
+		<property name="maxPoolSize" value="100" />
 		<property name="borrowConnectionTimeout" value="10000" />
 	</bean>
-	 -->
+-->
 </beans>

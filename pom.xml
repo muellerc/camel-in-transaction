@@ -24,6 +24,13 @@
         <configuration>
           <runOrder>reversealphabetical</runOrder>
           <forkMode>always</forkMode>
+          	<includes>
+ 				<include>**/xa/*Test.java</include>
+			</includes>
+			<systemPropertyVariables>
+				<jotm.recovery.Enabled>true</jotm.recovery.Enabled>
+				<aries.transaction.recoverable>true</aries.transaction.recoverable>
+			</systemPropertyVariables>
         </configuration>
       </plugin>
 	</plugins>
@@ -68,12 +75,12 @@
         <dependency>
             <groupId>com.atomikos</groupId>
             <artifactId>transactions-jdbc</artifactId>
-            <version>3.7.1</version>
+            <version>3.8.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.atomikos</groupId>
             <artifactId>transactions-jms</artifactId>
-            <version>3.7.1</version>
+            <version>3.8.0-SNAPSHOT</version>
         </dependency>
 
         <!-- Aries transaction manager -->
@@ -85,9 +92,9 @@
 
         <!-- JOTM transaction manager -->
         <dependency>
-            <groupId>jotm</groupId>
-            <artifactId>jotm</artifactId>
-            <version>2.0.10</version>
+            <groupId>org.ow2.jotm</groupId>
+            <artifactId>jotm-standalone</artifactId>
+            <version>2.2.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.transaction</groupId>
