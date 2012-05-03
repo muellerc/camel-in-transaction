@@ -35,11 +35,19 @@
         <property name="resourceName" value="activemq.default" />
     </bean>
 
+
+    <bean id="pooledJmsXaConnectionFactory"
+          class="com.atomikos.jms.AtomikosConnectionFactoryBean" depends-on="broker">
+          <property name="maxPoolSize" value="8" />
+        <property name="uniqueResourceName" value="amq1"/>
+        <property name="xaConnectionFactory" ref="jmsXaConnectionFactory"/>
+    </bean>
+    <!--
     <bean id="pooledJmsXaConnectionFactory" class="org.apache.activemq.pool.XaPooledConnectionFactory">
         <property name="maxConnections" value="8" />
         <property name="connectionFactory" ref="jmsXaConnectionFactory" />
         <property name="transactionManager" ref="transactionManager"/>
-    </bean>
+    </bean> -->
 
 
     <bean id="jmsXaConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory" depends-on="broker">
@@ -69,29 +77,26 @@
     </bean>
 
     <!-- JDBC configuration -->
-<!---->
+<!--
     <bean id="dataSource" class="org.apache.commons.dbcp.managed.BasicManagedDataSource">
         <property name="transactionManager" ref="transactionManager"/>
         <property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource40"/>
         <property name="url" value="jdbc:derby:target/testdb;create=true"/>
         <property name="defaultAutoCommit" value="false"/>
     </bean>
+-->
 
-  <!--
   <bean id="dataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean"
 		init-method="init" destroy-method="close">
 		<property name="uniqueResourceName" value="testdb" />
-		<property name="xaDataSourceClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource" />
+		<property name="xaDataSourceClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource40" />
 		<property name="xaProperties">
 			<props>
-				<prop key="databaseName">target/testdb</prop>
-				<prop key="createDatabase">create</prop>
+				<prop key="databaseName">target/atomikos</prop>
+				<prop key="connectionAttributes">create=true</prop>
 			</props>
 		</property>
-		<property name="poolSize" value="8"/>
-		<property name="minPoolSize" value="1" />
-		<property name="maxPoolSize" value="100" />
-		<property name="borrowConnectionTimeout" value="10000" />
+		<property name="maxPoolSize" value="5"/>
 	</bean>
--->
+<!---->
 </beans>
