@@ -39,7 +39,7 @@
     <bean id="pooledJmsXaConnectionFactory"
           class="com.atomikos.jms.AtomikosConnectionFactoryBean" depends-on="broker">
           <property name="maxPoolSize" value="8" />
-        <property name="uniqueResourceName" value="amq1"/>
+        <property name="uniqueResourceName" value="atomikos"/>
         <property name="xaConnectionFactory" ref="jmsXaConnectionFactory"/>
     </bean>
     <!--
