@@ -6,7 +6,9 @@
     <groupId>org.apache.cmueller.camel.samples.camelone</groupId>
     <artifactId>camel-in-transaction</artifactId>
     <version>1.0.0</version>
+
 	<build>
+
 	<plugins>
 	<plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -28,9 +30,9 @@
  				<include>**/xa/*Test.java</include>
 			</includes>
 			<systemPropertyVariables>
-				<jotm.recovery.Enabled>true</jotm.recovery.Enabled>
-				<aries.transaction.recoverable>true</aries.transaction.recoverable>
+				<jotm.home>${basedir}</jotm.home>
 			</systemPropertyVariables>
+			<workingDirectory>${project.build.directory}</workingDirectory>
         </configuration>
       </plugin>
 	</plugins>
@@ -74,14 +76,10 @@
 
         <dependency>
             <groupId>com.atomikos</groupId>
-            <artifactId>transactions-jdbc</artifactId>
+            <artifactId>transactions-osgi</artifactId>
             <version>3.7.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.atomikos</groupId>
-            <artifactId>transactions-jms</artifactId>
-            <version>3.7.1</version>
-        </dependency>
+
 
         <!-- Aries transaction manager -->
         <dependency>
