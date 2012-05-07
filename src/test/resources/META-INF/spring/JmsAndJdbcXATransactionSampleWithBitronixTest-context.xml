@@ -6,9 +6,9 @@
        ">
 
     <import resource="broker.xml"/>
-    
+
     <!-- TX configuration -->
-    
+
     <bean id="jtaTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
         <property name="transactionManager" ref="transactionManager"/>
         <property name="userTransaction" ref="transactionManager" />
@@ -17,22 +17,22 @@
     <bean id="btmConfig" factory-method="getConfiguration" class="bitronix.tm.TransactionManagerServices">
         <property name="serverId" value="spring-btm" />
     </bean>
-	
+
     <bean id="transactionManager" factory-method="getTransactionManager" class="bitronix.tm.TransactionManagerServices" depends-on="btmConfig" destroy-method="shutdown" />
 
     <bean id="PROPAGATION_REQUIRED" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
         <property name="transactionManager" ref="jtaTransactionManager"/>
         <property name="propagationBehaviorName" value="PROPAGATION_REQUIRED"/>
     </bean>
-    
+
     <!-- JMS configuration -->
-    
+
     <bean id="resourceManager" class="org.apache.activemq.pool.ActiveMQResourceManager" init-method="recoverResource">
         <property name="transactionManager" ref="transactionManager" />
         <property name="connectionFactory" ref="pooledJmsXaConnectionFactory" />
         <property name="resourceName" value="activemq.default" />
     </bean>
-    
+
     <bean id="pooledJmsXaConnectionFactory" class="bitronix.tm.resource.jms.PoolingConnectionFactory" init-method="init" destroy-method="close" depends-on="broker">
         <property name="className" value="org.apache.activemq.ActiveMQXAConnectionFactory" />
         <property name="uniqueName" value="activemq" />
@@ -47,21 +47,21 @@
     <bean id="activemqXa" class="org.apache.activemq.camel.component.ActiveMQComponent">
         <!-- because of https://issues.apache.org/jira/browse/AMQ-3251, we cannot use the XaPooledConnectionFactory in AMQ 5.5.1 -->
         <property name="connectionFactory" ref="pooledJmsXaConnectionFactory"/>
-        <property name="transacted" value="false"/>
+        <property name="transacted" value="true"/>
         <property name="transactionManager" ref="jtaTransactionManager"/>
     </bean>
-    
+
     <!-- JMS configuration for test enqueue/dequeue without transactions -->
 
     <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory" depends-on="broker">
         <property name="brokerURL" value="tcp://localhost:61616"/>
     </bean>
-    
+
     <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
         <property name="connectionFactory" ref="jmsConnectionFactory"/>
         <property name="transacted" value="false"/>
     </bean>
-    
+
     <!-- JDBC configuration -->
 
     <bean id="dataSource" class="bitronix.tm.resource.jdbc.PoolingDataSource" init-method="init" destroy-method="close">

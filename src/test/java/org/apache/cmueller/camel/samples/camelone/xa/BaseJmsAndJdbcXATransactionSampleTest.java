@@ -157,17 +157,17 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
                     .throwException(new SQLException("forced exception for test"))
                     .to("activemqXa:queue:transaction.outgoing.three");
 
-                from("activemqXa:queue:transaction.incoming.four")
-	                .transacted("PROPAGATION_REQUIRED")
-	                .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSourceRef=dataSource")
-	                .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSourceRef=dataSource")
-	                .to("activemqXa:queue:transaction.outgoing.four")
-	                .process(new Processor() {
-						@Override
-						public void process(Exchange exchange) throws Exception {
-							latch.countDown();
-						}
-					});
+                from("activemqXa:queue:transaction.incoming.four?concurrentConsumers=5")
+                .transacted("PROPAGATION_REQUIRED")
+                .to("sql:UPDATE account SET balance = balance - # WHERE name = 'foo'?dataSourceRef=dataSource")
+                .to("sql:UPDATE account SET balance = balance + # WHERE name = 'bar'?dataSourceRef=dataSource")
+                .to("activemqXa:queue:transaction.outgoing.four")
+                .process(new Processor() {
+                                 @Override
+                                 public void process(Exchange exchange) throws Exception {
+                                        latch.countDown();
+                                 }
+                           });
             }
         };
     }
