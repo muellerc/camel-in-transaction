@@ -52,7 +52,7 @@
     <bean id="activemqXa" class="org.apache.activemq.camel.component.ActiveMQComponent">
         <!-- because of https://issues.apache.org/jira/browse/AMQ-3251, we cannot use the XaPooledConnectionFactory in AMQ 5.5.1 -->
         <property name="connectionFactory" ref="pooledJmsXaConnectionFactory"/>
-        <property name="transacted" value="true"/>
+        <property name="transacted" value="false"/>
         <property name="transactionManager" ref="jtaTransactionManager"/>
     </bean>
 

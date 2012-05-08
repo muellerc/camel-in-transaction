@@ -27,8 +27,7 @@
           <runOrder>reversealphabetical</runOrder>
           <forkMode>always</forkMode>
           	<includes>
- 				<include>**/xa/*AtomikosTest.java</include>
- 				<include>**/xa/*BitonixTest.java</include>
+ 				<include>**/xa/*Test.java</include>
 			</includes>
 			<systemPropertyVariables>
 				<jotm.home>${basedir}</jotm.home>
