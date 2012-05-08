@@ -40,7 +40,7 @@
     <bean id="pooledJmsXaConnectionFactory"
           class="com.atomikos.jms.AtomikosConnectionFactoryBean" depends-on="broker">
           <property name="maxPoolSize" value="8" />
-        <property name="uniqueResourceName" value="atomikos"/>
+        <property name="uniqueResourceName" value="activemq"/>
         <property name="xaConnectionFactory" ref="jmsXaConnectionFactory"/>
     </bean>
 
@@ -77,10 +77,11 @@
   <bean id="dataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean"
 		init-method="init" destroy-method="close">
 		<property name="uniqueResourceName" value="testdb" />
-		<property name="xaDataSourceClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource40" />
+		<!-- Atomikos doesn't implement JDBC 4.0 -->
+		<property name="xaDataSourceClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource" />
 		<property name="xaProperties">
 			<props>
-				<prop key="databaseName">target/atomikos</prop>
+				<prop key="databaseName">testdb</prop>
 				<prop key="connectionAttributes">create=true</prop>
 			</props>
 		</property>

@@ -71,7 +71,6 @@
 	    <property name="driverProperties">
             <props>
                 <prop key="databaseName">testdb</prop>
-                <prop key="databaseName">target/testdb</prop>
                 <prop key="connectionAttributes">create=true</prop>
             </props>
         </property>

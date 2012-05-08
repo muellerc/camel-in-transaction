@@ -74,7 +74,7 @@
     <bean id="dataSource" class="org.apache.commons.dbcp.managed.BasicManagedDataSource">
         <property name="transactionManager" ref="transactionManager"/>
         <property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource40"/>
-        <property name="url" value="jdbc:derby:target/testdb;create=true"/>
+        <property name="url" value="jdbc:derby:testdb;create=true"/>
         <property name="defaultAutoCommit" value="false"/>
     </bean>
 </beans>
