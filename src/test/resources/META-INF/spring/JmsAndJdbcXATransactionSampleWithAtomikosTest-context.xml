@@ -86,6 +86,7 @@
 			</props>
 		</property>
 		<property name="maxPoolSize" value="5"/>
+		<property name="testQuery" value="VALUES 1"/>
 	</bean>
-<!---->
+
 </beans>
