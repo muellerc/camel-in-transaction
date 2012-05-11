@@ -43,7 +43,7 @@
 
     <!-- <bean id="pooledJmsXaConnectionFactory" class="com.atomikos.jms.AtomikosConnectionFactoryBean" init-method="init" destroy-method="close">
         <property name="poolSize" value="8" />
-        <property name="uniqueResourceName" value="amq" />
+        <property name="uniqueResourceName" value="activemq" />
         <property name="xaConnectionFactory" ref="jmsXaConnectionFactory" />
     </bean> -->
     
@@ -88,12 +88,10 @@
         <property name="xaProperties">
             <props>
                 <prop key="databaseName">target/testdb</prop>
-                <prop key="createDatabase">create</prop>
+                <prop key="createDatabase">create=true</prop>
             </props>
         </property>
         <property name="poolSize" value="5"/>
-        <property name="minPoolSize" value="1" />
-        <property name="maxPoolSize" value="10" />
-        <property name="borrowConnectionTimeout" value="10000" />
+        <property name="testQuery" value="VALUES 1"/>
     </bean> -->
 </beans>
