@@ -26,9 +26,7 @@
         <configuration>
           <runOrder>reversealphabetical</runOrder>
           <forkMode>always</forkMode>
-          	<includes>
- 				<include>**/xa/*Test.java</include>
-			</includes>
+
 			<systemPropertyVariables>
 				<jotm.home>${basedir}</jotm.home>
 			</systemPropertyVariables>

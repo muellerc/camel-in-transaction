@@ -37,12 +37,13 @@
     </bean>
 
 
-    <bean id="pooledJmsXaConnectionFactory"
-          class="com.atomikos.jms.AtomikosConnectionFactoryBean" depends-on="broker">
-          <property name="maxPoolSize" value="8" />
+     <bean id="pooledJmsXaConnectionFactory" class="com.atomikos.jms.AtomikosConnectionFactoryBean"
+          init-method="init" destroy-method="close" depends-on="broker">
+        <property name="maxPoolSize" value="8" />
         <property name="uniqueResourceName" value="activemq"/>
         <property name="xaConnectionFactory" ref="jmsXaConnectionFactory"/>
     </bean>
+
 
 
 

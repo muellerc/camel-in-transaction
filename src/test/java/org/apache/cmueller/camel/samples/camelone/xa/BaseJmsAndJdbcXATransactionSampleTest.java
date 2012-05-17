@@ -11,7 +11,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.test.junit4.CamelSpringTestSupport;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -70,7 +70,7 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
         });
     }
 
-    @Ignore
+
     @Test
     public void moneyShouldBeTransfered() {
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
@@ -84,7 +84,7 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
         assertEquals(900, queryForLong("SELECT balance from account where name = 'foo'"));
         assertEquals(1100, queryForLong("SELECT balance from account where name = 'bar'"));
     }
-    @Ignore
+
     @Test
     public void moneyShouldNotTransfered() {
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
@@ -99,7 +99,7 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
     }
 
-    @Ignore
+
     @Test
     public void moneyShouldNotTransfered2() throws Exception {
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
