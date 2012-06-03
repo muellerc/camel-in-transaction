@@ -88,7 +88,7 @@
         <property name="xaProperties">
             <props>
                 <prop key="databaseName">target/testdb</prop>
-                <prop key="createDatabase">create=true</prop>
+                <prop key="connectionAttributes">create=true</prop>
             </props>
         </property>
         <property name="poolSize" value="5"/>
