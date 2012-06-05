@@ -36,26 +36,21 @@
         <property name="resourceName" value="activemq.default" />
     </bean>
 
-
+<!--
      <bean id="pooledJmsXaConnectionFactory" class="com.atomikos.jms.AtomikosConnectionFactoryBean"
           init-method="init" destroy-method="close" depends-on="broker">
         <property name="maxPoolSize" value="8" />
         <property name="uniqueResourceName" value="activemq"/>
         <property name="xaConnectionFactory" ref="jmsXaConnectionFactory"/>
     </bean>
-
-<<<<<<< HEAD
-
-
-
-=======
-    <!-- <bean id="pooledJmsXaConnectionFactory" class="com.atomikos.jms.AtomikosConnectionFactoryBean" init-method="init" destroy-method="close">
+-->
+     <bean id="pooledJmsXaConnectionFactory" class="com.atomikos.jms.AtomikosConnectionFactoryBean" init-method="init" destroy-method="close">
         <property name="poolSize" value="8" />
         <property name="uniqueResourceName" value="activemq" />
         <property name="xaConnectionFactory" ref="jmsXaConnectionFactory" />
-    </bean> -->
-    
->>>>>>> e2610be1d6d50a1ae14782f32bd381b6391e0abb
+    </bean>
+
+
     <bean id="jmsXaConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory" depends-on="broker">
         <property name="brokerURL" value="tcp://localhost:61616"/>
         <property name="redeliveryPolicy">
@@ -84,7 +79,7 @@
 
     <!-- JDBC configuration -->
 
-<<<<<<< HEAD
+
   <bean id="dataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean"
 		init-method="init" destroy-method="close">
 		<property name="uniqueResourceName" value="testdb" />
@@ -100,15 +95,16 @@
 		<property name="testQuery" value="VALUES 1"/>
 	</bean>
 
-=======
+
+<!--
     <bean id="dataSource" class="org.apache.commons.dbcp.managed.BasicManagedDataSource">
         <property name="transactionManager" ref="transactionManager"/>
         <property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource40"/>
         <property name="url" value="jdbc:derby:target/testdb;create=true"/>
         <property name="defaultAutoCommit" value="false"/>
     </bean>
-    
-    <!-- <bean id="dataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+
+    <bean id="dataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
         <property name="uniqueResourceName" value="derby" />
         <property name="xaDataSourceClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource" />
         <property name="xaProperties">
@@ -120,5 +116,5 @@
         <property name="poolSize" value="5"/>
         <property name="testQuery" value="VALUES 1"/>
     </bean> -->
->>>>>>> e2610be1d6d50a1ae14782f32bd381b6391e0abb
+
 </beans>
