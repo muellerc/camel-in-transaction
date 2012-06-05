@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+=======
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+>>>>>>> e2610be1d6d50a1ae14782f32bd381b6391e0abb
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -7,6 +11,7 @@
     <artifactId>camel-in-transaction</artifactId>
     <version>1.0.0</version>
 
+<<<<<<< HEAD
 	<build>
 
 	<plugins>
@@ -35,8 +40,10 @@
       </plugin>
 	</plugins>
 	</build>
+=======
+>>>>>>> e2610be1d6d50a1ae14782f32bd381b6391e0abb
     <dependencies>
-		<!-- database related dependencies -->
+        <!-- database related dependencies -->
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-sql</artifactId>
@@ -69,20 +76,36 @@
             <artifactId>activemq-camel</artifactId>
             <version>5.6.0</version>
         </dependency>
+<<<<<<< HEAD
 		<dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-pool</artifactId>
             <version>5.6.0</version>
+=======
+
+        <!-- Atomikos transaction manager -->
+        <dependency>
+            <groupId>com.atomikos</groupId>
+            <artifactId>transactions-jdbc</artifactId>
+            <version>3.8.0</version>
+>>>>>>> e2610be1d6d50a1ae14782f32bd381b6391e0abb
         </dependency>
         <!-- Atomikos transaction manager -->
 
         <dependency>
             <groupId>com.atomikos</groupId>
+<<<<<<< HEAD
             <artifactId>transactions-osgi</artifactId>
             <version>3.8.0</version>
         </dependency>
 
 
+=======
+            <artifactId>transactions-jms</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+
+>>>>>>> e2610be1d6d50a1ae14782f32bd381b6391e0abb
         <!-- Aries transaction manager -->
         <dependency>
             <groupId>org.apache.aries.transaction</groupId>
@@ -93,6 +116,7 @@
         <!-- JOTM transaction manager -->
         <dependency>
             <groupId>org.ow2.jotm</groupId>
+<<<<<<< HEAD
             <artifactId>jotm-standalone</artifactId>
             <version>2.2.3</version>
             <exclusions>
@@ -110,17 +134,27 @@
         	<groupId>javax.transaction</groupId>
         	<artifactId>transaction-api</artifactId>
         	<version>1.1</version>
+=======
+            <artifactId>jotm-core</artifactId>
+            <version>2.2.3</version>
+>>>>>>> e2610be1d6d50a1ae14782f32bd381b6391e0abb
         </dependency>
+
+        <!-- Bitronix transaction manager -->
         <dependency>
-        	<groupId>org.apache.geronimo.specs</groupId>
-        	<artifactId>geronimo-jta_1.0.1B_spec</artifactId>
-        	<version>1.0.1</version>
+            <groupId>org.codehaus.btm</groupId>
+            <artifactId>btm</artifactId>
+            <version>2.1.2</version>
         </dependency>
+
+        <!-- test dependencies -->
         <dependency>
-        	<groupId>org.apache.geronimo.specs</groupId>
-        	<artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
-        	<version>2.0.0</version>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-test</artifactId>
+            <version>2.9.2</version>
+            <scope>test</scope>
         </dependency>
+<<<<<<< HEAD
 
         <!-- Bitronix transaction manager -->
 		<dependency>
@@ -136,6 +170,8 @@
 			<version>2.9.2</version>
 			<scope>test</scope>
 		</dependency>
+=======
+>>>>>>> e2610be1d6d50a1ae14782f32bd381b6391e0abb
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -145,6 +181,15 @@
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-core</artifactId>
             <version>5.6.0</version>
+<<<<<<< HEAD
+=======
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-pool</artifactId>
+            <version>5.6.0</version>
+>>>>>>> e2610be1d6d50a1ae14782f32bd381b6391e0abb
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -153,6 +198,7 @@
             <version>3.9</version>
             <scope>test</scope>
         </dependency>
+<<<<<<< HEAD
         <dependency>
   		    <groupId>log4j</groupId>
   			<artifactId>log4j</artifactId>
@@ -166,4 +212,42 @@
 			<url>https://repository.apache.org/content/repositories/snapshots</url>
 		</repository>
 	</repositories> -->
+=======
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12</version>
+                <configuration>
+                    <systemProperties>
+                        <property>
+                            <name>derby.stream.error.file</name>
+                            <value>target/derby.log</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>apache.snapshots</id>
+            <url>https://repository.apache.org/content/repositories/snapshots</url>
+        </repository>
+    </repositories>
+>>>>>>> e2610be1d6d50a1ae14782f32bd381b6391e0abb
 </project>
