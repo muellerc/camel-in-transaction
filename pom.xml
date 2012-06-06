@@ -127,6 +127,10 @@
 					<runOrder>reversealphabetical</runOrder>
 					<systemProperties>
 						<property>
+							<name>jotm.home</name>
+							<value>${basedir}/src/test/resources</value>
+						</property>
+						<property>
 							<name>derby.stream.error.file</name>
 							<value>target/derby.log</value>
 						</property>

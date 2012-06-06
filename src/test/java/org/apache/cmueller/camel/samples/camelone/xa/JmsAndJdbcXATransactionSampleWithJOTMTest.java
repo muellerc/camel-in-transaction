@@ -7,15 +7,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class JmsAndJdbcXATransactionSampleWithJOTMTest extends BaseJmsAndJdbcXATransactionSampleTest {
 
-    @BeforeClass
-    public static void setUpBeforeClass() {
-    	System.setProperty("jotm.home", "${basedir}/src/test/resources");
-    }
-
-    @AfterClass
-    public static void tearDownAfterClass() {
-    	System.clearProperty("jotm.home");
-    }
 
     @Override
     protected AbstractApplicationContext createApplicationContext() {
