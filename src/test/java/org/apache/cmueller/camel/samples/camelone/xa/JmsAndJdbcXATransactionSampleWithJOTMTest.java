@@ -6,12 +6,12 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class JmsAndJdbcXATransactionSampleWithJOTMTest extends BaseJmsAndJdbcXATransactionSampleTest {
-	
+
     @BeforeClass
     public static void setUpBeforeClass() {
-    	System.setProperty("jotm.home", "src/test/resources");
+    	System.setProperty("jotm.home", "${basedir}/src/test/resources");
     }
-    
+
     @AfterClass
     public static void tearDownAfterClass() {
     	System.clearProperty("jotm.home");
@@ -20,5 +20,5 @@ public class JmsAndJdbcXATransactionSampleWithJOTMTest extends BaseJmsAndJdbcXAT
     @Override
     protected AbstractApplicationContext createApplicationContext() {
         return new ClassPathXmlApplicationContext("META-INF/spring/JmsAndJdbcXATransactionSampleWithJOTMTest-context.xml");
-    }    
+    }
 }
