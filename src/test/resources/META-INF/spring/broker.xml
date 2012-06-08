@@ -10,5 +10,13 @@
         <broker:transportConnectors>
             <broker:transportConnector uri="tcp://localhost:61616"/>
         </broker:transportConnectors>
+        
+        <broker:systemUsage>
+            <broker:systemUsage>
+                <broker:tempUsage>
+                    <broker:tempUsage limit="50 mb"/>
+                </broker:tempUsage>
+            </broker:systemUsage>
+        </broker:systemUsage>
     </broker:broker>
 </beans>
