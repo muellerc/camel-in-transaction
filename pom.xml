@@ -64,6 +64,12 @@
 			<groupId>org.ow2.jotm</groupId>
 			<artifactId>jotm-core</artifactId>
 			<version>2.2.3</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>howl</artifactId>
+					<groupId>org.objectweb.howl</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Bitronix transaction manager -->
@@ -132,7 +138,7 @@
 						</property>
 						<property>
 							<name>derby.stream.error.file</name>
-							<value>target/derby.log</value>
+							<value>derby.log</value>
 						</property>
 					</systemProperties>
 				</configuration>
