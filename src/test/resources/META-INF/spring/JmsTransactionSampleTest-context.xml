@@ -20,7 +20,7 @@
     
     <!-- JMS configuration -->
 
-    <bean id="pooledJmsConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+    <bean id="pooledJmsConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory" init-method="start" destroy-method="stop">
         <property name="maxConnections" value="8" />
         <property name="connectionFactory" ref="jmsConnectionFactory" />
     </bean>
