@@ -8,18 +8,7 @@
     <import resource="broker.xml"/>
     
     <!-- TX configuration -->
-    
-    <bean id="jtaTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
-        <property name="transactionManager" ref="transactionManager"/>
-        <property name="userTransaction" ref="userTransaction"/>
-    </bean>
-    
-    <bean id="transactionManager" class="org.apache.aries.transaction.GeronimoPlatformTransactionManager"/>
-
-    <bean id="userTransaction" class="org.apache.geronimo.transaction.GeronimoUserTransaction">
-        <constructor-arg ref="transactionManager"/>
-        <property name="transactionTimeout" value="120"/>
-    </bean>
+    <bean id="jtaTransactionManager" class="org.apache.aries.transaction.GeronimoPlatformTransactionManager"/>
     
     <bean id="PROPAGATION_REQUIRED" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
         <property name="transactionManager" ref="jtaTransactionManager"/>
@@ -29,7 +18,7 @@
     <!-- JMS configuration -->
     
     <bean id="resourceManager" class="org.apache.activemq.pool.ActiveMQResourceManager" init-method="recoverResource">
-        <property name="transactionManager" ref="transactionManager" />
+        <property name="transactionManager" ref="jtaTransactionManager" />
         <property name="connectionFactory" ref="pooledJmsXaConnectionFactory" />
         <property name="resourceName" value="activemq.default" />
     </bean>
@@ -37,7 +26,7 @@
     <bean id="pooledJmsXaConnectionFactory" class="org.apache.activemq.pool.XaPooledConnectionFactory" init-method="start" destroy-method="stop">
         <property name="maxConnections" value="8" />
         <property name="connectionFactory" ref="jmsXaConnectionFactory" />
-        <property name="transactionManager" ref="transactionManager"/>
+        <property name="transactionManager" ref="jtaTransactionManager"/>
     </bean>
     
     <bean id="jmsXaConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory" depends-on="broker">
@@ -70,7 +59,7 @@
     <!-- JDBC configuration -->
 
     <bean id="dataSource" class="org.apache.commons.dbcp.managed.BasicManagedDataSource">
-        <property name="transactionManager" ref="transactionManager"/>
+        <property name="transactionManager" ref="jtaTransactionManager"/>
         <property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource40"/>
         <property name="url" value="jdbc:derby:target/testdb;create=true"/>
         <property name="defaultAutoCommit" value="false"/>
