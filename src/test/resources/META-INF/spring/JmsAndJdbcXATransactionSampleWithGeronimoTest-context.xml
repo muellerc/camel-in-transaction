@@ -9,12 +9,40 @@
     
     <!-- TX configuration -->
     
+    <bean id="xidFactoryImpl" class="org.apache.geronimo.transaction.manager.XidFactoryImpl" />
+    
+    <bean id="howlLog" class="org.apache.geronimo.transaction.log.HOWLLog" init-method="doStart" destroy-method="doStop">
+        <constructor-arg index="0" value="org.objectweb.howl.log.BlockLogBuffer" />
+        <constructor-arg index="1" value="4" />
+        <constructor-arg index="2" value="true" />
+        <constructor-arg index="3" value="true" />
+        <constructor-arg index="4" value="20" />
+        <constructor-arg index="5" value="txlog" />
+        <constructor-arg index="6" value="log" />
+        <constructor-arg index="7" value="geronimo_tx" />
+        <constructor-arg index="8" value="200" />
+        <constructor-arg index="9" value="10" />
+        <constructor-arg index="10" value="2" />
+        <constructor-arg index="11" value="2" />
+        <constructor-arg index="12" value="10" />
+        <constructor-arg index="13" ref="xidFactoryImpl" />
+        <constructor-arg index="14">
+            <bean class="java.io.File">
+                <constructor-arg index="0" value="target" />
+            </bean>
+        </constructor-arg>
+    </bean>
+    
     <bean id="jtaTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
         <property name="transactionManager" ref="transactionManager"/>
         <property name="userTransaction" ref="userTransaction"/>
     </bean>
     
-    <bean id="transactionManager" class="org.apache.aries.transaction.GeronimoPlatformTransactionManager"/>
+    <bean id="transactionManager" class="org.apache.aries.transaction.GeronimoPlatformTransactionManager">
+        <constructor-arg index="0" value="120" />
+        <constructor-arg index="1" ref="xidFactoryImpl" />
+        <constructor-arg index="2" ref="howlLog" />
+    </bean>
 
     <bean id="userTransaction" class="org.apache.geronimo.transaction.GeronimoUserTransaction">
         <constructor-arg ref="transactionManager"/>
@@ -68,7 +96,11 @@
     </bean>
     
     <!-- JDBC configuration -->
-
+    
+    <!-- FIXME: current workaround is to set the log to level FATAL
+    Please correct the integration and supply a NamedXAResource
+    Cannot log transactions as org.apache.commons.dbcp.managed.LocalXAConnectionFactory$LocalXAResource@2f8fc9ba is not a NamedXAResource.
+    Cannot log transactions as TransactionContext{transactionId=null} is not a NamedXAResource. -->
     <bean id="dataSource" class="org.apache.commons.dbcp.managed.BasicManagedDataSource">
         <property name="transactionManager" ref="transactionManager"/>
         <property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource40"/>
