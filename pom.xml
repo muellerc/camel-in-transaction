@@ -5,6 +5,10 @@
     <groupId>org.apache.cmueller.camel.samples.camelone</groupId>
     <artifactId>camel-in-transaction</artifactId>
     <version>1.1.0-SNAPSHOT</version>
+    
+    <prerequisites>
+        <maven>3.0.3</maven>
+    </prerequisites>
 
     <dependencies>
         <!-- database related dependencies -->
