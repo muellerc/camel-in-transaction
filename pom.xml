@@ -4,7 +4,7 @@
 
     <groupId>org.apache.cmueller.camel.samples.camelone</groupId>
     <artifactId>camel-in-transaction</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0-SNAPSHOT</version>
 
     <dependencies>
         <!-- database related dependencies -->
