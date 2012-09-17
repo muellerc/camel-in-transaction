@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    ">
+
+    <import resource="broker.xml" />
+    
+    <!-- TX configuration -->
+    
+    <bean id="jmsTransactionManager" class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="pooledJmsConnectionFactory"/>
+    </bean>
+    
+    <bean id="dataSourceTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="PROPAGATION_REQUIRED_JMS" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
+        <property name="transactionManager" ref="jmsTransactionManager"/>
+        <property name="propagationBehaviorName" value="PROPAGATION_REQUIRED"/>
+    </bean>
+    
+    <bean id="PROPAGATION_REQUIRED_JDBC" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
+        <property name="transactionManager" ref="dataSourceTransactionManager"/>
+        <property name="propagationBehaviorName" value="PROPAGATION_REQUIRED"/>
+    </bean>
+
+    <!-- JMS configuration -->
+
+    <bean id="pooledJmsConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory" init-method="start" destroy-method="stop">
+        <property name="maxConnections" value="8" />
+        <property name="connectionFactory" ref="jmsConnectionFactory" />
+    </bean>
+    
+    <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory" depends-on="broker">
+        <property name="brokerURL" value="tcp://localhost:61616"/>
+        <property name="redeliveryPolicy">
+            <bean class="org.apache.activemq.RedeliveryPolicy">
+                <property name="maximumRedeliveries" value="0"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="activemqTx" class="org.apache.activemq.camel.component.ActiveMQComponent">
+        <property name="connectionFactory" ref="pooledJmsConnectionFactory"/>
+        <property name="transacted" value="true"/>
+        <property name="transactionManager" ref="jmsTransactionManager"/>
+    </bean>
+    
+    <!-- JMS configuration for test enqueue/dequeue without transactions -->
+    
+    <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
+        <property name="connectionFactory" ref="pooledJmsConnectionFactory"/>
+        <property name="transacted" value="false"/>
+    </bean>
+
+    <!-- JDBC configuration -->
+    
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource40" />
+        <property name="url" value="jdbc:derby:target/testdb;create=true" />
+        <property name="defaultAutoCommit" value="false" />
+    </bean>
+</beans>
