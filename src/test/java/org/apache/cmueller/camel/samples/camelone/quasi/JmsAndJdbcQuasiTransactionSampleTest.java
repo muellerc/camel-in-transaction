@@ -94,6 +94,13 @@ public class JmsAndJdbcQuasiTransactionSampleTest extends CamelSpringTestSupport
                         .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSourceRef=dataSource")
                         .to("jms:output.two");
 
+                from("jms:input.three")
+                        .transacted()
+                        .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSourceRef=dataSource")
+                        .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSourceRef=dataSource")
+                        .throwException(new SQLException("forced exception for test"))
+                        .to("jms:output.three");
+
             }
         };
     }
@@ -127,7 +134,7 @@ public class JmsAndJdbcQuasiTransactionSampleTest extends CamelSpringTestSupport
     }
 
     @Test
-    public void moneyShouldNotTransfer()
+    public void moneyShouldNotTransferWhenExceptionInBetweenUpdates()
     {
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
@@ -140,4 +147,20 @@ public class JmsAndJdbcQuasiTransactionSampleTest extends CamelSpringTestSupport
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
     }
+
+    @Test
+    public void moneyShouldNotTransferWhenExceptionAfterUpdates()
+    {
+        assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
+        assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
+
+        template.sendBody("jms:input.three", 100L);
+
+        Exchange exchange = consumer.receive("jms:ActiveMQ.DLQ", 5000);
+        assertNotNull(exchange);
+
+        assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
+        assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
+    }
+
 }
