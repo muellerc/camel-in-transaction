@@ -111,7 +111,7 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
     }
     
-    @Test
+    //@Test
     public void perfTest() throws Exception {
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));

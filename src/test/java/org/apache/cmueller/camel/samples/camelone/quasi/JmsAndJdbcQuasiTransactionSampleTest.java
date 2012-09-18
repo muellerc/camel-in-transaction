@@ -102,13 +102,15 @@ public class JmsAndJdbcQuasiTransactionSampleTest extends CamelSpringTestSupport
                         .throwException(new SQLException("forced exception for test"))
                         .to("jms:output.three");
 
-                from("direct:splitMe")
+                from("seda:splitMe")
                         .transacted()
+                        .to("log:beforeSplit?multiline=true&showAll=true&level=WARN")
                         .split().body().shareUnitOfWork()
+                        .to("log:beforeQueue?multiline=true&showAll=true&level=WARN")
+                        .to("jms:output:splat")
                         .choice()
                             .when(body().isEqualTo("poison"))
-                                .throwException(new IllegalArgumentException("No way, Jose!"))
-                        .to("jms:output:splat");
+                                .throwException(new IllegalArgumentException("No way, Jose!")).end();
 
             }
         };
@@ -175,7 +177,7 @@ public class JmsAndJdbcQuasiTransactionSampleTest extends CamelSpringTestSupport
     @Test
     public void allSplitsShouldBeDelivered()
     {
-        template.sendBody("direct:splitMe", Arrays.asList("a", "b", "c"));
+        template.sendBody("seda:splitMe", Arrays.asList("a", "b", "c"));
 
         Exchange exchange1 = consumer.receive("jms:output:splat", 3000);
         assertNotNull(exchange1);
@@ -191,9 +193,17 @@ public class JmsAndJdbcQuasiTransactionSampleTest extends CamelSpringTestSupport
     @Test
     public void noSplitsShouldBeDelivered()
     {
-        template.sendBody("direct:splitMe", Arrays.asList("that", "girl", "is", "poison"));
-        Exchange exchange = consumer.receive("jms:output:splat", 3000);
-        assertNull(exchange);
+        try
+        {
+            template.sendBody("seda:splitMe", Arrays.asList("that", "girl", "is", "poison"));
+            Exchange exchange = consumer.receive("jms:output:splat", 3000);
+            assertNull(exchange);
+        }
+        catch (Exception e)
+        {
+            fail("Should not get an exception.");
+        }
+
     }
 
 
