@@ -33,7 +33,7 @@
     </bean>
 
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
-        <property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedXADataSource40"/>
+        <property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedDataSource40"/>
         <property name="url" value="jdbc:derby:target/testdb;create=true"/>
         <property name="defaultAutoCommit" value="false"/>
     </bean>

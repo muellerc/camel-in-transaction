@@ -17,6 +17,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 public class JmsAndJdbcQuasiTransactionSampleTest extends CamelSpringTestSupport
 {
@@ -101,6 +102,14 @@ public class JmsAndJdbcQuasiTransactionSampleTest extends CamelSpringTestSupport
                         .throwException(new SQLException("forced exception for test"))
                         .to("jms:output.three");
 
+                from("direct:splitMe")
+                        .transacted()
+                        .split().body().shareUnitOfWork()
+                        .choice()
+                            .when(body().isEqualTo("poison"))
+                                .throwException(new IllegalArgumentException("No way, Jose!"))
+                        .to("jms:output:splat");
+
             }
         };
     }
@@ -162,5 +171,30 @@ public class JmsAndJdbcQuasiTransactionSampleTest extends CamelSpringTestSupport
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
         assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
     }
+
+    @Test
+    public void allSplitsShouldBeDelivered()
+    {
+        template.sendBody("direct:splitMe", Arrays.asList("a", "b", "c"));
+
+        Exchange exchange1 = consumer.receive("jms:output:splat", 3000);
+        assertNotNull(exchange1);
+        assertEquals("a", exchange1.getIn().getBody(String.class));
+        Exchange exchange2 = consumer.receive("jms:output:splat", 3000);
+        assertNotNull(exchange2);
+        assertEquals("b", exchange2.getIn().getBody(String.class));
+        Exchange exchange3 = consumer.receive("jms:output:splat", 3000);
+        assertNotNull(exchange3);
+        assertEquals("c", exchange3.getIn().getBody(String.class));
+    }
+
+    @Test
+    public void noSplitsShouldBeDelivered()
+    {
+        template.sendBody("direct:splitMe", Arrays.asList("that", "girl", "is", "poison"));
+        Exchange exchange = consumer.receive("jms:output:splat", 3000);
+        assertNull(exchange);
+    }
+
 
 }
