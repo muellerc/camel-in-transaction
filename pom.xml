@@ -9,6 +9,11 @@
     <prerequisites>
         <maven>3.0.3</maven>
     </prerequisites>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
 
     <dependencies>
         <!-- database related dependencies -->
@@ -148,33 +153,33 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.openjpa</groupId>
-                <artifactId>openjpa-maven-plugin</artifactId>
-                <version>2.2.0</version>
-                <configuration>
-                    <persistenceXmlFile>${project.basedir}/src/test/resources/META-INF/persistence.xml</persistenceXmlFile>
-                    <includes>org/apache/cmueller/camel/samples/camelone/jpa/PersonEntity.class</includes>
-                    <addDefaultConstructor>true</addDefaultConstructor>
-                    <enforcePropertyRestrictions>true</enforcePropertyRestrictions>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>test enhancer</id>
-                        <phase>process-test-classes</phase>
-                        <goals>
-                            <goal>test-enhance</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.openjpa</groupId>
-                        <artifactId>openjpa</artifactId>
-                        <version>2.2.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
+<!--             <plugin> -->
+<!--                 <groupId>org.apache.openjpa</groupId> -->
+<!--                 <artifactId>openjpa-maven-plugin</artifactId> -->
+<!--                 <version>2.2.0</version> -->
+<!--                 <configuration> -->
+<!--                     <persistenceXmlFile>${project.basedir}/src/test/resources/META-INF/persistence.xml</persistenceXmlFile> -->
+<!--                     <includes>org/apache/cmueller/camel/samples/camelone/jpa/PersonEntity.class</includes> -->
+<!--                     <addDefaultConstructor>true</addDefaultConstructor> -->
+<!--                     <enforcePropertyRestrictions>true</enforcePropertyRestrictions> -->
+<!--                 </configuration> -->
+<!--                 <executions> -->
+<!--                     <execution> -->
+<!--                         <id>test enhancer</id> -->
+<!--                         <phase>process-test-classes</phase> -->
+<!--                         <goals> -->
+<!--                             <goal>test-enhance</goal> -->
+<!--                         </goals> -->
+<!--                     </execution> -->
+<!--                 </executions> -->
+<!--                 <dependencies> -->
+<!--                     <dependency> -->
+<!--                         <groupId>org.apache.openjpa</groupId> -->
+<!--                         <artifactId>openjpa</artifactId> -->
+<!--                         <version>2.2.0</version> -->
+<!--                     </dependency> -->
+<!--                 </dependencies> -->
+<!--             </plugin> -->
         </plugins>
     </build>
 
