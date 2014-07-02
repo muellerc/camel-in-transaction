@@ -8,5 +8,5 @@ public class JmsAndJdbcXATransactionSampleWithBitonixTest extends BaseJmsAndJdbc
     @Override
     protected AbstractApplicationContext createApplicationContext() {
         return new ClassPathXmlApplicationContext("META-INF/spring/JmsAndJdbcXATransactionSampleWithBitronixTest-context.xml");
-    }    
+    }
 }

@@ -8,5 +8,5 @@ public class JmsAndJdbcXATransactionSampleWithGeronimoTest extends BaseJmsAndJdb
     @Override
     protected AbstractApplicationContext createApplicationContext() {
         return new ClassPathXmlApplicationContext("META-INF/spring/JmsAndJdbcXATransactionSampleWithGeronimoTest-context.xml");
-    }    
+    }
 }

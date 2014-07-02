@@ -5,27 +5,23 @@
             http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        ">
 
-    <import resource="broker.xml"/>
-    
     <!-- TX configuration -->
-    
     <bean id="transactionManager" class="org.springframework.jms.connection.JmsTransactionManager">
         <property name="connectionFactory" ref="pooledJmsConnectionFactory"/>
     </bean>
-    
+
     <bean id="PROPAGATION_REQUIRED" class="org.apache.camel.spring.spi.SpringTransactionPolicy">
         <property name="transactionManager" ref="transactionManager"/>
         <property name="propagationBehaviorName" value="PROPAGATION_REQUIRED"/>
     </bean>
-    
-    <!-- JMS configuration -->
 
+    <!-- JMS configuration -->
     <bean id="pooledJmsConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory" init-method="start" destroy-method="stop">
         <property name="maxConnections" value="8" />
         <property name="connectionFactory" ref="jmsConnectionFactory" />
     </bean>
-    
-    <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory" depends-on="broker">
+
+    <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
         <property name="brokerURL" value="tcp://localhost:61616"/>
         <property name="redeliveryPolicy">
             <bean class="org.apache.activemq.RedeliveryPolicy">
@@ -39,15 +35,13 @@
         <property name="transacted" value="true"/>
         <property name="transactionManager" ref="transactionManager"/>
     </bean>
-    
+
     <!-- JMS configuration for test enqueue/dequeue without transactions -->
-    
     <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
         <property name="connectionFactory" ref="pooledJmsConnectionFactory"/>
         <property name="transacted" value="false"/>
     </bean>
-    
+
     <!-- business service implementation -->
-    
     <bean id="businessService" class="org.apache.cmueller.camel.samples.camelone.jms.BusinessService"/>
 </beans>

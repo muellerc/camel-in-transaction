@@ -4,8 +4,8 @@ import org.apache.camel.Exchange;
 
 public class BusinessService {
 
-	public void computeOffer(Exchange exchange) throws Exception {
-		// simulate processing...
-		Thread.sleep(100);
-	}
+    public void computeOffer(Exchange exchange) throws Exception {
+        // simulate processing...
+        Thread.sleep(100);
+    }
 }
