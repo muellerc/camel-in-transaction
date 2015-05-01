@@ -4,7 +4,7 @@
 
     <groupId>org.apache.cmueller.camel.samples.camelone</groupId>
     <artifactId>camel-in-transaction</artifactId>
-    <version>2.15.2-SNAPSHOT</version>
+    <version>2.15.2</version>
 
     <prerequisites>
         <maven>3.0.3</maven>
