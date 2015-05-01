@@ -19,7 +19,6 @@ public class JmsAndJdbcXATransactionSampleWithJOTMTest extends BaseJmsAndJdbcXAT
 
     @Override
     protected AbstractApplicationContext createApplicationContext() {
-        return new ClassPathXmlApplicationContext(
-                "META-INF/spring/JmsAndJdbcXATransactionSampleWithJOTMTest-context.xml");
+        return new ClassPathXmlApplicationContext("META-INF/spring/JmsAndJdbcXATransactionSampleWithJOTMTest-context.xml");
     }
 }

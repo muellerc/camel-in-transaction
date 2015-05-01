@@ -3,23 +3,17 @@ package org.apache.cmueller.camel.samples.camelone.xa;
 import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 
-import javax.sql.DataSource;
-
 import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.usage.SystemUsage;
-import org.apache.activemq.usage.TempUsage;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.test.spring.CamelSpringTestSupport;
+import org.apache.cmueller.camel.samples.camelone.ActiveMQUtil;
+import org.apache.cmueller.camel.samples.camelone.DatabaseUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringTestSupport {
@@ -33,109 +27,71 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
     @Before
     @Override
     public void setUp() throws Exception {
-        broker = new BrokerService();
-        broker.setPersistent(false);
-        broker.setUseJmx(false);
-        broker.setBrokerName("localhost");
-        broker.addConnector("tcp://localhost:61616");
-        SystemUsage systemUsage = new SystemUsage();
-        TempUsage tempUsage = new TempUsage();
-        tempUsage.setLimit(52428800L);
-        systemUsage.setTempUsage(tempUsage);
-        broker.setSystemUsage(systemUsage);
-        broker.start();
+        broker = ActiveMQUtil.createAndStartBroker();
 
         super.setUp();
 
-        DataSource ds = context.getRegistry().lookupByNameAndType("dataSource", DataSource.class);
-        jdbc = new JdbcTemplate(ds);
-
-        PlatformTransactionManager transactionManager = context.getRegistry().lookupByNameAndType(
-                "jtaTransactionManager", PlatformTransactionManager.class);
-        transactionTemplate = new TransactionTemplate(transactionManager);
-
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                jdbc.execute("CREATE TABLE account (name VARCHAR(50), balance BIGINT)");
-                jdbc.execute("INSERT INTO account VALUES('foo',1000)");
-                jdbc.execute("INSERT INTO account VALUES('bar',1000)");
-            }
-        });
+        jdbc = DatabaseUtil.createJdbcTemplate(context);
+        transactionTemplate = DatabaseUtil.createTransactionTemplate(context, "jtaTransactionManager");
+        DatabaseUtil.createAndInitializeDatabase(transactionTemplate, jdbc);
     }
 
     @After
     @Override
     public void tearDown() throws Exception {
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                jdbc.execute("DROP TABLE account");
-            }
-        });
+        DatabaseUtil.dropDatabase(transactionTemplate, jdbc);
 
         super.tearDown();
 
-        if (broker != null) {
-            broker.stop();
-        }
-    }
-
-    private long queryForLong(final String query) {
-        return transactionTemplate.execute(new TransactionCallback<Long>() {
-            @Override
-            public Long doInTransaction(TransactionStatus status) {
-                return jdbc.queryForObject(query, Long.class);
-            }
-        });
+        ActiveMQUtil.stopBroker(broker);
     }
 
     @Test
     public void moneyShouldBeTransfered() {
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'foo'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'bar'"));
 
         template.sendBody("activemq:queue:transaction.incoming.one", new Long(100));
 
         Exchange exchange = consumer.receive("activemq:queue:transaction.outgoing.one", 5000);
         assertNotNull(exchange);
 
-        assertEquals(900, queryForLong("SELECT balance from account where name = 'foo'"));
-        assertEquals(1100, queryForLong("SELECT balance from account where name = 'bar'"));
+        assertEquals(900, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'foo'"));
+        assertEquals(1100, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'bar'"));
     }
 
     @Test
     public void moneyShouldNotTransfered() {
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'foo'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'bar'"));
 
         template.sendBody("activemq:queue:transaction.incoming.two", new Long(100));
 
         Exchange exchange = consumer.receive("activemq:queue:ActiveMQ.DLQ", 5000);
         assertNotNull(exchange);
 
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'foo'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'bar'"));
     }
 
     @Test
     public void moneyShouldNotTransfered2() throws Exception {
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'foo'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'bar'"));
 
         template.sendBody("activemq:queue:transaction.incoming.three", new Long(100));
 
         Exchange exchange = consumer.receive("activemq:queue:ActiveMQ.DLQ", 5000);
         assertNotNull(exchange);
 
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'foo'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'bar'"));
     }
 
     @Test
     public void perfTest() throws Exception {
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'foo'"));
-        assertEquals(1000, queryForLong("SELECT balance from account where name = 'bar'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'foo'"));
+        assertEquals(1000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'bar'"));
 
         // warm up
         latch = new CountDownLatch(100);
@@ -154,45 +110,44 @@ public abstract class BaseJmsAndJdbcXATransactionSampleTest extends CamelSpringT
 
         System.out.println("duration: " + (end - start) + "ms");
 
-        assertEquals(0, queryForLong("SELECT balance from account where name = 'foo'"));
-        assertEquals(2000, queryForLong("SELECT balance from account where name = 'bar'"));
+        assertEquals(0, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'foo'"));
+        assertEquals(2000, DatabaseUtil.queryForLong(transactionTemplate, jdbc, "SELECT balance from account where name = 'bar'"));
     }
 
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
-            @Override
             public void configure() throws Exception {
                 from("activemqXa:queue:transaction.incoming.one")
-                        .transacted("PROPAGATION_REQUIRED")
-                        .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSource=dataSource")
-                        .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSource=dataSource")
-                        .to("activemqXa:queue:transaction.outgoing.one");
+                    .transacted("PROPAGATION_REQUIRED")
+                    .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSource=dataSource")
+                    .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSource=dataSource")
+                    .to("activemqXa:queue:transaction.outgoing.one");
 
                 from("activemqXa:queue:transaction.incoming.two")
-                        .transacted("PROPAGATION_REQUIRED")
-                        .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSource=dataSource")
-                        .throwException(new SQLException("forced exception for test"))
-                        .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSource=dataSource")
-                        .to("activemqXa:queue:transaction.outgoing.two");
+                    .transacted("PROPAGATION_REQUIRED")
+                    .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSource=dataSource")
+                    .throwException(new SQLException("forced exception for test"))
+                    .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSource=dataSource")
+                    .to("activemqXa:queue:transaction.outgoing.two");
 
                 from("activemqXa:queue:transaction.incoming.three")
-                        .transacted("PROPAGATION_REQUIRED")
-                        .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSource=dataSource")
-                        .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSource=dataSource")
-                        .throwException(new SQLException("forced exception for test"))
-                        .to("activemqXa:queue:transaction.outgoing.three");
+                    .transacted("PROPAGATION_REQUIRED")
+                    .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSource=dataSource")
+                    .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSource=dataSource")
+                    .throwException(new SQLException("forced exception for test"))
+                    .to("activemqXa:queue:transaction.outgoing.three");
 
                 from("activemqXa:queue:transaction.incoming.four")
-                        .transacted("PROPAGATION_REQUIRED")
-                        .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSource=dataSource")
-                        .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSource=dataSource")
-                        .to("activemqXa:queue:transaction.outgoing.four").process(new Processor() {
-                            @Override
-                            public void process(Exchange exchange) throws Exception {
-                                latch.countDown();
-                            }
-                        });
+                    .transacted("PROPAGATION_REQUIRED")
+                    .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'foo') - # WHERE name = 'foo'?dataSource=dataSource")
+                    .to("sql:UPDATE account SET balance = (SELECT balance from account where name = 'bar') + # WHERE name = 'bar'?dataSource=dataSource")
+                    .to("activemqXa:queue:transaction.outgoing.four")
+                    .process(new Processor() {
+                        public void process(Exchange exchange) throws Exception {
+                            latch.countDown();
+                        }
+                    });
             }
         };
     }

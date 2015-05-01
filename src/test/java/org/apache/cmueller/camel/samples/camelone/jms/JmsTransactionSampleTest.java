@@ -3,11 +3,10 @@ package org.apache.cmueller.camel.samples.camelone.jms;
 import java.sql.SQLException;
 
 import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.usage.SystemUsage;
-import org.apache.activemq.usage.TempUsage;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.test.spring.CamelSpringTestSupport;
+import org.apache.cmueller.camel.samples.camelone.ActiveMQUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,17 +20,7 @@ public class JmsTransactionSampleTest extends CamelSpringTestSupport {
     @Before
     @Override
     public void setUp() throws Exception {
-        broker = new BrokerService();
-        broker.setPersistent(false);
-        broker.setUseJmx(false);
-        broker.setBrokerName("localhost");
-        broker.addConnector("tcp://localhost:61616");
-        SystemUsage systemUsage = new SystemUsage();
-        TempUsage tempUsage = new TempUsage();
-        tempUsage.setLimit(52428800L);
-        systemUsage.setTempUsage(tempUsage);
-        broker.setSystemUsage(systemUsage);
-        broker.start();
+        broker = ActiveMQUtil.createAndStartBroker();
 
         super.setUp();
     }
@@ -41,9 +30,7 @@ public class JmsTransactionSampleTest extends CamelSpringTestSupport {
     public void tearDown() throws Exception {
         super.tearDown();
 
-        if (broker != null) {
-            broker.stop();
-        }
+        ActiveMQUtil.stopBroker(broker);
     }
 
     @Test
@@ -68,11 +55,11 @@ public class JmsTransactionSampleTest extends CamelSpringTestSupport {
             @Override
             public void configure() throws Exception {
                 from("activemqTx:queue:transaction.incoming.one").transacted("PROPAGATION_REQUIRED")
-                        .to("bean:businessService?method=computeOffer").to("activemqTx:queue:transaction.outgoing.one");
+                    .to("bean:businessService?method=computeOffer").to("activemqTx:queue:transaction.outgoing.one");
 
                 from("activemqTx:queue:transaction.incoming.two").transacted("PROPAGATION_REQUIRED")
-                        .throwException(new SQLException("forced exception for test"))
-                        .to("activemqTx:queue:transaction.outgoing.two");
+                    .throwException(new SQLException("forced exception for test"))
+                    .to("activemqTx:queue:transaction.outgoing.two");
             }
         };
     }
